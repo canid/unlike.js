@@ -15,18 +15,20 @@ function doKeys(e) {
 	}
 	
 	// update screen buffer.
+	console.log("monsters: "+monsters.length);
 	for (y=0; y<buffSizeY; y++){
 		for(x=0; x<buffSizeX; x++) {
 			var td = document.getElementById('tr'+y+'td'+x);
 			if (x == player.curX && y == player.curY) td.innerHTML = '@';
 			else td.innerHTML = screenBuff[x][y];
 			monsters.forEach( function(monster, i) {
-				if (monster.dead == true) monsters.slice(i);
+				if (monster.dead == true) {monsters.splice(i, 1); console.log('snip');}
 				else if (x==monster.curX && y==monster.curY)  td.innerHTML = monster.icon;
 			});
 		
 		}
 	}
+	console.log("now: "+monsters.length);
 	if(debug) {
 		var etime = new Date().getTime();
 		console.log('doKeys() exec time: '+(etime-stime)+'. cursor at '+player.curX+', '+player.curY);
@@ -42,7 +44,7 @@ function array2d(x, y) {
 }
 
 function doCombat(foe) {
-	console.log('damage'+player.dmg-foe.ac);
+	//console.log('damage'+(player.dmg-foe.ac));
 	player.hp -= foe.dmg-player.ac;
 	foe.hp -= player.dmg-foe.ac;
 	if (foe.hp <= 0) foe.dead=true;
@@ -52,11 +54,11 @@ function doCombat(foe) {
 }
 
 function isCollision(x, y) {
-	var collider = '';
+	var collider = false;
 	monsters.forEach( function(monster) {
-		console.log(monster.icon);
-		if (x==monster.curX && y==monster.curY) { monster = doCombat(monster); return true;}
-	});
+		if (x==monster.curX && y==monster.curY) { monster = doCombat(monster); collider = monster}
+	})
+	if(collider) {console.log(collider); return true;}
 	switch (screenBuff[x][y]) {
 		case ' ': collider = ' ';
 		case '-': collider = '-';
@@ -67,7 +69,8 @@ function isCollision(x, y) {
 		case '|': screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
 		case '-': screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
 		case '#': collider = '#'; screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
-		default: if(debug) console.log('collision: '+collider); return true;
+		default: 
+		if(debug) console.log('collision: '+collider); return true;
 	}
 }
 
@@ -86,7 +89,6 @@ function genDungeon() {
 				dungeon[x][y] = '-';
 			}
 	}
-	//alert("test: "+monsters[0].curX+', '+monsters[0].curY+': '+monsters[0].icon);
 	
 	// rnd seed room size and location
 	var rSizeX = rndBetween(5, 8);
