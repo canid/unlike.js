@@ -40,7 +40,7 @@ function array2d(x, y) {
     return arr;
 }
 
-function doCombat(targetx, targety) {
+function doCombat(targetX, targetY) {
 	
 }
 
@@ -54,7 +54,7 @@ function isCollision(x, y) {
 	}
 }
 
-function rBetween(min, max) {
+function rndBetween(min, max) {
 	return Math.floor(Math.random()*(max-min+1)+min);
 }
 
@@ -69,9 +69,26 @@ function genDungeon() {
 				else dungeon[x][y] = '.';
 			}
 	}
-	curX = rBetween(9, 21);
-	curY = rBetween(9, 21);
-	dungeon[curX][curY] = '@';
+	
+	// rnd seed room size and location
+	var rSizeX = rndBetween(4, 9);
+	var rSizeY = rndBetween(4, 9); if(debug) console.log("rSizeX: "+rSizeX+", rSizeY: "+rSizeY);
+	var rStartX = rndBetween(1, buffSizeX-rSizeX-1);
+	var rStartY = rndBetween(1, buffSizeY-rSizeY)-1; if(debug) console.log("rStartX: "+rStartX+", rStartY: "+rStartY);
+	
+	// set cursor ~ middle of seed room.
+	curX = Math.round(rSizeX/2) + rStartX;
+	curY = Math.round(rSizeY/2)+ rStartY;
+	// draw seed room.
+	for (var hwall = rStartX; hwall < rStartX+rSizeX; hwall++) {
+		dungeon[hwall][rStartY] = '#';
+		dungeon[hwall][rStartY+rSizeY] = '#';
+	}
+	for (var vwall = rStartY; vwall < rStartY+rSizeY; vwall++) {
+		dungeon[rStartX][vwall] = '#';
+		dungeon[rStartX+rSizeX][vwall] = '#';		
+	}
+	dungeon[curX][curY] = '@'; if(debug) console.log("cursor: "+curX+", "+curY);
 	return dungeon;
 }
 
