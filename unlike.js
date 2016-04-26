@@ -15,14 +15,15 @@ function doKeys(e) {
 	}
 	
 	// update screen buffer.
-	screenBuff[prevX][prevY] = "."; 
-	screenBuff[curX][curY] = '@';
+	//screenBuff[prevX][prevY] = " "; 
+	//screenBuff[curX][curY] = '@';
 	for (y=0; y<buffSizeY; y++){
 		for(x=0; x<buffSizeX; x++) {
 			var td = document.getElementById('tr'+y+'td'+x);
 			if (typeof screenBuff[x][y] == 'object') {
 				td.innerHTML = screenBuff[x][y][0];
 			}
+			else if (x == curX && y == curY) td.innerHTML = '@';
 			else td.innerHTML = screenBuff[x][y];
 		}
 	}
@@ -46,10 +47,16 @@ function doCombat(targetX, targetY) {
 
 function isCollision(x, y) {
 	var collider = '';
-	console.log('isCollision('+x+', '+y+')');
 	switch (screenBuff[x][y]) {
-		case "'": return false; break;
-		case '.': return false; break;
+		case ' ': collider = ' ';
+		case '-': collider = '-';
+		case '.': collider = '.';
+		case ' ': collider = ' ';
+		case '~': collider = '~';
+		case '`': collider = '`'; return false;
+		case '|': screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
+		case '-': screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
+		case '#': collider = '#'; screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
 		default: if(debug) console.log('collision: '+collider); return true;
 	}
 }
@@ -66,29 +73,29 @@ function genDungeon() {
 				if (Math.random() > 0.996 ) {
 					dungeon[x][y] = new Array('j', 3);
 				}
-				else dungeon[x][y] = '.';
+				else dungeon[x][y] = '-';
 			}
 	}
 	
 	// rnd seed room size and location
-	var rSizeX = rndBetween(4, 9);
-	var rSizeY = rndBetween(4, 9); if(debug) console.log("rSizeX: "+rSizeX+", rSizeY: "+rSizeY);
-	var rStartX = rndBetween(1, buffSizeX-rSizeX-1);
-	var rStartY = rndBetween(1, buffSizeY-rSizeY)-1; if(debug) console.log("rStartX: "+rStartX+", rStartY: "+rStartY);
+	var rSizeX = rndBetween(5, 8);
+	var rSizeY = rndBetween(5, 8); if(debug) console.log("rSizeX: "+rSizeX+", rSizeY: "+rSizeY);
+	var rStartX = rndBetween(0, buffSizeX-rSizeX-1);
+	var rStartY = rndBetween(0, buffSizeY-rSizeY)-1; if(debug) console.log("rStartX: "+rStartX+", rStartY: "+rStartY);
 	
 	// set cursor ~ middle of seed room.
-	curX = Math.round(rSizeX/2) + rStartX;
-	curY = Math.round(rSizeY/2)+ rStartY;
+	curX = Math.floor(rSizeX/2) + rStartX;
+	curY = Math.floor(rSizeY/2)+ rStartY;
 	// draw seed room.
 	for (var hwall = rStartX; hwall < rStartX+rSizeX; hwall++) {
 		dungeon[hwall][rStartY] = '#';
-		dungeon[hwall][rStartY+rSizeY] = '#';
+		dungeon[hwall][rStartY+rSizeY-1] = '#';
 	}
 	for (var vwall = rStartY; vwall < rStartY+rSizeY; vwall++) {
 		dungeon[rStartX][vwall] = '#';
-		dungeon[rStartX+rSizeX][vwall] = '#';		
+		dungeon[rStartX+rSizeX-1][vwall] = '#';		
 	}
-	dungeon[curX][curY] = '@'; if(debug) console.log("cursor: "+curX+", "+curY);
+	//dungeon[curX][curY] = '@'; if(debug) console.log("cursor: "+curX+", "+curY);
 	return dungeon;
 }
 
@@ -110,6 +117,7 @@ for (y=0; y<buffSizeY; y++){
 			console.log('drawing jackal');
 			td.appendChild(document.createTextNode(screenBuff[x][y][0]));			
 		}
+		else if (x == curX && y == curY) td.appendChild(document.createTextNode('@'));
 		else td.appendChild(document.createTextNode(screenBuff[x][y]));
         tr.appendChild(td);
 	}
