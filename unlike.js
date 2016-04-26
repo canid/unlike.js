@@ -15,20 +15,18 @@ function doKeys(e) {
 	}
 	
 	// update screen buffer.
-	console.log("monsters: "+monsters.length);
 	for (y=0; y<buffSizeY; y++){
 		for(x=0; x<buffSizeX; x++) {
 			var td = document.getElementById('tr'+y+'td'+x);
 			if (x == player.curX && y == player.curY) td.innerHTML = '@';
 			else td.innerHTML = screenBuff[x][y];
 			monsters.forEach( function(monster, i) {
-				if (monster.dead == true) {monsters.splice(i, 1); console.log('snip');}
+				if (monster.dead == true) monsters.splice(i, 1);
 				else if (x==monster.curX && y==monster.curY)  td.innerHTML = monster.icon;
 			});
 		
 		}
 	}
-	console.log("now: "+monsters.length);
 	if(debug) {
 		var etime = new Date().getTime();
 		console.log('doKeys() exec time: '+(etime-stime)+'. cursor at '+player.curX+', '+player.curY);
@@ -44,7 +42,6 @@ function array2d(x, y) {
 }
 
 function doCombat(foe) {
-	//console.log('damage'+(player.dmg-foe.ac));
 	player.hp -= foe.dmg-player.ac;
 	foe.hp -= player.dmg-foe.ac;
 	if (foe.hp <= 0) foe.dead=true;
@@ -58,7 +55,7 @@ function isCollision(x, y) {
 	monsters.forEach( function(monster) {
 		if (x==monster.curX && y==monster.curY) { monster = doCombat(monster); collider = monster}
 	})
-	if(collider) {console.log(collider); return true;}
+	if(collider) {console.log('collision: '+collider.icon); return true;}
 	switch (screenBuff[x][y]) {
 		case ' ': collider = ' ';
 		case '-': collider = '-';
@@ -113,14 +110,13 @@ function genDungeon() {
 	return dungeon;
 }
 
-
 var debug = true;
+
 var buffSizeX =24, buffSizeY = 24;
 
 var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
 var monsters = [];
 
-//var curX = 0; var curY = 0;
 var screenBuff = genDungeon();
 // Creating table of sceen buffer elements with their contents as text nodes.
 var body = document.getElementsByTagName('body')[0];
