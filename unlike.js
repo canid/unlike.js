@@ -54,22 +54,31 @@ function isCollision(x, y) {
 	}
 }
 
-var debug = true;
-var buffSizeX =32, buffSizeY = 32;
-var curX = 0, curY = 0;
-screenBuff = array2d(buffSizeX,buffSizeY);
-
-// Seeding screen buffer. level generation will replace this.
-for (y=0; y<buffSizeY; y++){
-		for(x=0; x<buffSizeX; x++) {
-			if (Math.random() > 0.996 ) {
-				screenBuff[x][y] = new Array('j', 3);
-			}
-			else screenBuff[x][y] = '.';
-		}
-		screenBuff[curX][curY] = '@';
+function rBetween(min, max) {
+	return Math.floor(Math.random()*(max-min+1)+min);
 }
 
+function genDungeon() {
+// Seeding screen buffer. level generation will replace this.
+	var dungeon = array2d(buffSizeX,buffSizeY);	
+	for (y=0; y<buffSizeY; y++){
+			for(x=0; x<buffSizeX; x++) {
+				if (Math.random() > 0.996 ) {
+					dungeon[x][y] = new Array('j', 3);
+				}
+				else dungeon[x][y] = '.';
+			}
+	}
+	curX = rBetween(9, 21);
+	curY = rBetween(9, 21);
+	dungeon[curX][curY] = '@';
+	return dungeon;
+}
+
+var debug = true;
+var buffSizeX =32, buffSizeY = 32;
+var curX = 0; var curY = 0;
+var screenBuff = genDungeon();
 // Creating table of sceen buffer elements with their contents as text nodes.
 var body = document.getElementsByTagName('body')[0];
 var tbl = document.createElement('table');
