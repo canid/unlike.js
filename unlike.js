@@ -1,35 +1,35 @@
 function doKeys(e) {
 	if (debug) var stime = new Date().getTime();
-	var prevX = curX, prevY = curY;
+	var prevX = player.curX, prevY = player.curY;
 	var keyCode = e.keyCode; 
 	switch(keyCode) {		
-		case 38: (curY > 0 && !isCollision(curX, curY-1)) && curY--; break;
-		case 104: (curY > 0 && !isCollision(curX, curY-1)) && curY--; break;
-		case 40: (curY < buffSizeY-1 && !isCollision(curX, curY+1)) && curY++; break;
-		case 98: (curY < buffSizeY-1 && !isCollision(curX, curY+1)) && curY++; break;
-		case 37: (curX > 0 && !isCollision(curX-1, curY)) && curX--; break;
-		case 100: (curX > 0 && !isCollision(curX-1, curY)) && curX--; break;
-		case 39: (curX < buffSizeX-1 && !isCollision(curX+1, curY)) && curX++; break;
-		case 102: (curX < buffSizeX-1 && !isCollision(curX+1, curY)) && curX++; break;
+		case 38: (player.curY > 0 && !isCollision(player.curX, player.curY-1)) && player.curY--; break;
+		case 104: (player.curY > 0 && !isCollision(player.curX, player.curY-1)) && player.curY--; break;
+		case 40: (player.curY < buffSizeY-1 && !isCollision(player.curX, player.curY+1)) && player.curY++; break;
+		case 98: (player.curY < buffSizeY-1 && !isCollision(player.curX, player.curY+1)) && player.curY++; break;
+		case 37: (player.curX > 0 && !isCollision(player.curX-1, player.curY)) && player.curX--; break;
+		case 100: (player.curX > 0 && !isCollision(player.curX-1, player.curY)) && player.curX--; break;
+		case 39: (player.curX < buffSizeX-1 && !isCollision(player.curX+1, player.curY)) && player.curX++; break;
+		case 102: (player.curX < buffSizeX-1 && !isCollision(player.curX+1, player.curY)) && player.curX++; break;
 		default: break;
 	}
 	
 	// update screen buffer.
-	//screenBuff[prevX][prevY] = " "; 
-	//screenBuff[curX][curY] = '@';
 	for (y=0; y<buffSizeY; y++){
 		for(x=0; x<buffSizeX; x++) {
 			var td = document.getElementById('tr'+y+'td'+x);
-			if (typeof screenBuff[x][y] == 'object') {
-				td.innerHTML = screenBuff[x][y][0];
-			}
-			else if (x == curX && y == curY) td.innerHTML = '@';
+			if (x == player.curX && y == player.curY) td.innerHTML = '@';
 			else td.innerHTML = screenBuff[x][y];
+			monsters.forEach( function(monster, i) {
+				if (monster.dead == true) monsters.slice(i);
+				else if (x==monster.curX && y==monster.curY)  td.innerHTML = monster.icon;
+			});
+		
 		}
 	}
 	if(debug) {
 		var etime = new Date().getTime();
-		console.log('doKeys() exec time: '+(etime-stime)+'. cursor at '+curX+', '+curY);
+		console.log('doKeys() exec time: '+(etime-stime)+'. cursor at '+player.curX+', '+player.curY);
 	}
 }
 
@@ -41,12 +41,22 @@ function array2d(x, y) {
     return arr;
 }
 
-function doCombat(targetX, targetY) {
-	
+function doCombat(foe) {
+	console.log('damage'+player.dmg-foe.ac);
+	player.hp -= foe.dmg-player.ac;
+	foe.hp -= player.dmg-foe.ac;
+	if (foe.hp <= 0) foe.dead=true;
+	if (player.hp <= 0) player.dead=true;
+	if (debug) console.log('combat! player hp: '+player.hp+', foe hp: '+foe.hp);
+	return foe;
 }
 
 function isCollision(x, y) {
 	var collider = '';
+	monsters.forEach( function(monster) {
+		console.log(monster.icon);
+		if (x==monster.curX && y==monster.curY) { monster = doCombat(monster); return true;}
+	});
 	switch (screenBuff[x][y]) {
 		case ' ': collider = ' ';
 		case '-': collider = '-';
@@ -70,12 +80,13 @@ function genDungeon() {
 	var dungeon = array2d(buffSizeX,buffSizeY);	
 	for (y=0; y<buffSizeY; y++){
 			for(x=0; x<buffSizeX; x++) {
-				if (Math.random() > 0.996 ) {
-					dungeon[x][y] = new Array('j', 3);
+				if (Math.random() > 0.997 ) {
+					monsters.push({icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false});
 				}
-				else dungeon[x][y] = '-';
+				dungeon[x][y] = '-';
 			}
 	}
+	//alert("test: "+monsters[0].curX+', '+monsters[0].curY+': '+monsters[0].icon);
 	
 	// rnd seed room size and location
 	var rSizeX = rndBetween(5, 8);
@@ -84,8 +95,9 @@ function genDungeon() {
 	var rStartY = rndBetween(0, buffSizeY-rSizeY)-1; if(debug) console.log("rStartX: "+rStartX+", rStartY: "+rStartY);
 	
 	// set cursor ~ middle of seed room.
-	curX = Math.floor(rSizeX/2) + rStartX;
-	curY = Math.floor(rSizeY/2)+ rStartY;
+	player.curX = Math.floor(rSizeX/2) + rStartX;
+	player.curY = Math.floor(rSizeY/2)+ rStartY;
+
 	// draw seed room.
 	for (var hwall = rStartX; hwall < rStartX+rSizeX; hwall++) {
 		dungeon[hwall][rStartY] = '#';
@@ -95,13 +107,18 @@ function genDungeon() {
 		dungeon[rStartX][vwall] = '#';
 		dungeon[rStartX+rSizeX-1][vwall] = '#';		
 	}
-	//dungeon[curX][curY] = '@'; if(debug) console.log("cursor: "+curX+", "+curY);
+	
 	return dungeon;
 }
 
+
 var debug = true;
-var buffSizeX =32, buffSizeY = 32;
-var curX = 0; var curY = 0;
+var buffSizeX =24, buffSizeY = 24;
+
+var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
+var monsters = [];
+
+//var curX = 0; var curY = 0;
 var screenBuff = genDungeon();
 // Creating table of sceen buffer elements with their contents as text nodes.
 var body = document.getElementsByTagName('body')[0];
@@ -113,12 +130,12 @@ for (y=0; y<buffSizeY; y++){
 	for(x=0; x<buffSizeX; x++) {
 		var td = document.createElement('td');
 		td.setAttribute('id', 'tr'+y+'td'+x);
-		if (typeof screenBuff[x][y] == 'object') {
-			console.log('drawing jackal');
-			td.appendChild(document.createTextNode(screenBuff[x][y][0]));			
-		}
-		else if (x == curX && y == curY) td.appendChild(document.createTextNode('@'));
+		if (x==player.curX && y==player.curY) td.appendChild(document.createTextNode(player.icon));
 		else td.appendChild(document.createTextNode(screenBuff[x][y]));
+		monsters.forEach( function(monster) {
+			if (x==monster.curX && y==monster.curY)  td.innerHTML = monster.icon;
+		});
+
         tr.appendChild(td);
 	}
 	tbdy.appendChild(tr);

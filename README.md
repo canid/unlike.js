@@ -4,13 +4,16 @@
 
 ## Status
 
- Very early tinkering and not much else. A character 'screen buffer' is implemented and an html table with text nodes to display character elements.
+ Very early tinkering and not much else. A character 'screen buffer' is implemented and an html table with text nodes to display character elements. I have the beginnings of a combat system and creature tracking but no ai yet. there are rudimentary stats.
 
 ## License
  Meh.
 
 ## Todo
 * pretty much everything
+* create meaningful objecs for items and more creatures
+* create creature ai
+* make level gen do multiple rooms and connect them
 * ...
 * pretty much everything else.
 
