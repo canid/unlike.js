@@ -100,12 +100,19 @@ function genDungeon() {
 	var dungeon = array2d(buffSizeX,buffSizeY);	
 	for (y=0; y<buffSizeY; y++){
 			for(x=0; x<buffSizeX; x++) {
+				
+				// let's place some jackals
 				if (Math.random() > 0.998 ) {
 					entities.push({icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false, type:'monster'});
 				}
+				
+				// now some potions
 				else if (Math.random() > 0.9985 ) {
 					entities.push({icon:'\u2695', curX:x, curY:y, hp:5, type:'item'});
 				}
+				
+				/* now coins, trying  the design I'm hoping to use. this places all coins of each type
+				at the same x,y on screen for some reason. Will have to fix later*/
 				else if (Math.random() > 0.995) {
 					var copper = ccopper;
 					copper.curX = x; copper.curY = y;
@@ -118,6 +125,7 @@ function genDungeon() {
 					entities.push(silver);
 					console.log('silver! '+silver.curX+', '+silver.curY);
 				}
+				
 				dungeon[x][y] = '-';
 			}
 	}
