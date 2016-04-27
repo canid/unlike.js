@@ -20,7 +20,7 @@ function doKeys(e) {
 			entities.forEach( function(entity, i) {
 				if (entity.type=='item' && player.curX==entity.curX && player.curY == entity.curY) {
 					if (entity.name=='ccopper'||entity.name=='csilver'||entity.name=='cgold') {
-						player.au += entity.value; if (debug) console.log('Au: '+player.au);
+						player.ag += entity.value; if (debug) console.log('Ag: '+player.ag);
 					}
 					else player.inv.push(entity);
 					if(debug) console.log("push: "+player.inv[player.inv.length-1]);
@@ -41,6 +41,9 @@ function doKeys(e) {
 				if (entity.type == 'monster' && entity.dead) entities.splice(i, 1);
 				else if (x==entity.curX && y==entity.curY)  td.innerHTML = entity.icon;
 			});
+			document.getElementById('hp').innerHTML = "HP: "+player.hp+' ';
+			document.getElementById('ac').innerHTML = "AC: "+player.ac+' ';
+			document.getElementById('ag').innerHTML = "Ag: "+player.ag+' ';
 			if (x == player.curX && y == player.curY) td.innerHTML = '@';
 		}
 	}
@@ -103,7 +106,7 @@ function genDungeon() {
 				
 				// let's place some jackals
 				if (Math.random() > 0.998 ) {
-					entities.push({icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false, type:'monster'});
+					entities.push({name:'jackal', icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false, type:'monster'});
 				}
 				
 				// now some potions
@@ -116,19 +119,22 @@ function genDungeon() {
 				else if (Math.random() > 0.995) {
 					var copper = ccopper;
 					copper.curX = x; copper.curY = y;
+					copper.value= 0.01 * rndBetween(1, 100);
 					entities.push(copper);
-					console.log('copper! '+copper.curX+', '+copper.curY);
+					if(debug) console.log('copper! '+copper.curX+', '+copper.curY+': '+copper.value);
 				}
 				else if (Math.random() > 0.998) {
 					var silver = csilver;
 					silver.curX = x; silver.curY = y;
+					silver.value = rndBetween(1, 100);
 					entities.push(silver);
-					console.log('silver! '+silver.curX+', '+silver.curY);
+					console.log('silver! '+silver.curX+', '+silver.curY+': '+silver.value);
 				}
 				
 				dungeon[x][y] = '-';
 			}
 	}
+// cgold.value : rndBetween(1, 8)
 	
 	// rnd seed room size and location
 	var rSizeX = rndBetween(5, 8);
@@ -157,14 +163,14 @@ var debug = true;
 
 var buffSizeX =32, buffSizeY = 32;
 
-var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, au:0, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
+var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ag:0, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
 var entities = [];
 var phealing = {type:'item', name:'', hp:5};
 var pHealing = {type:'item', name:'', hp:10};
-var ccopper = {icon:'c',type:'item', name:'copper coins', value:rndBetween(0.01, 0.5)};
-var csilver = {icon:'s',type:'item', name:'silver coins', value:rndBetween(0.3, 2)};
-var cgold = {icon:'g',type:'item', name:'gold coins', value:rndBetween(1, 8)};
-var aleather = {type:'item', name:'leather armor'};
+var ccopper = {icon:'c',type:'item', name:'ccopper', desc:'', value:0, curX:0, curY:0};
+var csilver = {icon:'s',type:'item', name:'csilver', desc:'', value:0};
+var cgold = {icon:'g',type:'item', name:'cgold', desc:'', value:0, curX:0, curY:0};
+var aleather = {type:'item', name:'aleather', desc:'leather armor'};
 var achain = {type:'item', name:'chainmail armor'};
 
 var keyFlag = true;
@@ -183,7 +189,9 @@ for (y=0; y<buffSizeY; y++){
 		if (x==player.curX && y==player.curY) td.appendChild(document.createTextNode(player.icon));
 		else td.appendChild(document.createTextNode(screenBuff[x][y]));
 		entities.forEach( function(entity) {
-			if (x==entity.curX && y==entity.curY)  td.innerHTML = entity.icon;
+			if (x==entity.curX && y==entity.curY) {
+				td.innerHTML = entity.icon; if(debug) console.log(entity.name+': '+entity.curX+', '+entity.curY);
+			}
 		});
 
         tr.appendChild(td);
@@ -192,7 +200,6 @@ for (y=0; y<buffSizeY; y++){
 }
 tbl.appendChild(tbdy);
 body.appendChild(tbl);
-
 
 // create ui
 tbl2 = document.createElement('tbl');
@@ -208,12 +215,8 @@ a = document.createElement('a'); a.setAttribute('id', 'ac');
 a.appendChild(document.createTextNode('AC: '+player.ac+' '));
 td.appendChild(a);
 
-a = document.createElement('a'); a.setAttribute('id', 'au');
-a.appendChild(document.createTextNode('Au: '+player.au+' '));
-td.appendChild(a);
-
-a = document.createElement('a'); a.setAttribute('id', 'message');
-a.appendChild(document.createTextNode('Stats do not update in UI yet.'));
+a = document.createElement('a'); a.setAttribute('id', 'ag');
+a.appendChild(document.createTextNode('Ag: '+player.ag+' '));
 td.appendChild(a);
 
 tr.appendChild(td);
@@ -223,10 +226,4 @@ tbl2.appendChild(tbdy);
 body.appendChild(tbl2);
 
 body.addEventListener('keydown', doKeys, false);
-tbl.addEventListener('change', doUIStats, false);
 
-function doUIStats() {
-	alert('test');
-	document.getElementById('hp').innerHTML = 'HP: '+player.hp;
-	document.getElementById('ac').innerHTML = 'AC: '+player.ac;
-}
