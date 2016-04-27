@@ -19,7 +19,10 @@ function doKeys(e) {
 		case 71: 
 			entities.forEach( function(entity, i) {
 				if (entity.type=='item' && player.curX==entity.curX && player.curY == entity.curY) {
-					player.inv.push(entity);
+					if (entity.name=='ccopper'||entity.name=='csilver'||entity.name=='cgold') {
+						player.au += entity.value; if (debug) console.log('Au: '+player.au);
+					}
+					else player.inv.push(entity);
 					if(debug) console.log("push: "+player.inv[player.inv.length-1]);
 					entities.splice(i, 1);
 					if(debug) console.log("snip.");
@@ -69,7 +72,7 @@ function isCollision(x, y) {
 	
 	// check entities for monster collision at target location.
 	entities.forEach( function(entity) {
-		if (entity.type == 'monster' && x==entity.curX && y==entity.curY) { entity = doCombat(entity); collider = entity}
+		if (entity.type == 'monster' && x==entity.curX && y==entity.curY) {entity = doCombat(entity); collider = entity}
 	})
 	
 	if(collider) {if (debug) console.log('collision: '+collider.icon); return true;}
@@ -97,11 +100,23 @@ function genDungeon() {
 	var dungeon = array2d(buffSizeX,buffSizeY);	
 	for (y=0; y<buffSizeY; y++){
 			for(x=0; x<buffSizeX; x++) {
-				if (Math.random() > 0.997 ) {
+				if (Math.random() > 0.998 ) {
 					entities.push({icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false, type:'monster'});
 				}
-				else if (Math.random() > 0.998 ) {
+				else if (Math.random() > 0.9985 ) {
 					entities.push({icon:'\u2695', curX:x, curY:y, hp:5, type:'item'});
+				}
+				else if (Math.random() > 0.995) {
+					var copper = ccopper;
+					copper.curX = x; copper.curY = y;
+					entities.push(copper);
+					console.log('copper! '+copper.curX+', '+copper.curY);
+				}
+				else if (Math.random() > 0.998) {
+					var silver = csilver;
+					silver.curX = x; silver.curY = y;
+					entities.push(silver);
+					console.log('silver! '+silver.curX+', '+silver.curY);
 				}
 				dungeon[x][y] = '-';
 			}
@@ -132,10 +147,17 @@ function genDungeon() {
 
 var debug = true;
 
-var buffSizeX =24, buffSizeY = 24;
+var buffSizeX =32, buffSizeY = 32;
 
-var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
+var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, au:0, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
 var entities = [];
+var phealing = {type:'item', name:'', hp:5};
+var pHealing = {type:'item', name:'', hp:10};
+var ccopper = {icon:'c',type:'item', name:'copper coins', value:rndBetween(0.01, 0.5)};
+var csilver = {icon:'s',type:'item', name:'silver coins', value:rndBetween(0.3, 2)};
+var cgold = {icon:'g',type:'item', name:'gold coins', value:rndBetween(1, 8)};
+var aleather = {type:'item', name:'leather armor'};
+var achain = {type:'item', name:'chainmail armor'};
 
 var keyFlag = true;
 
@@ -176,6 +198,10 @@ td.appendChild(a);
 
 a = document.createElement('a'); a.setAttribute('id', 'ac');
 a.appendChild(document.createTextNode('AC: '+player.ac+' '));
+td.appendChild(a);
+
+a = document.createElement('a'); a.setAttribute('id', 'au');
+a.appendChild(document.createTextNode('Au: '+player.au+' '));
 td.appendChild(a);
 
 a = document.createElement('a'); a.setAttribute('id', 'message');
