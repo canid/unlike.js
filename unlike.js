@@ -14,10 +14,10 @@ function doKeys(e) {
 		case 71: 
 			entities.forEach( function(entity, i) {
 				if (entity.type=='item' && player.curX==entity.curX && player.curY == entity.curY) {
-					console.log("pop.");
 					player.inv.push(entity);
+					if(debug) console.log("push: "+player.inv[player.inv.length-1]);
 					entities.splice(i, 1);
-					console.log("snip.");
+					if(debug) console.log("snip.");
 				}
 			});
 			break;
@@ -67,7 +67,7 @@ function isCollision(x, y) {
 		if (entity.type == 'monster' && x==entity.curX && y==entity.curY) { entity = doCombat(entity); collider = entity}
 	})
 	
-	if(collider) {console.log('collision: '+collider.icon); return true;}
+	if(collider) {if (debug) console.log('collision: '+collider.icon); return true;}
 	switch (screenBuff[x][y]) {
 		case ' ': collider = ' ';
 		case '-': collider = '-';
@@ -75,9 +75,9 @@ function isCollision(x, y) {
 		case ' ': collider = ' ';
 		case '~': collider = '~';
 		case '`': collider = '`'; return false;
-		case '|': screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
-		case '-': screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
-		case '#': collider = '#'; screenBuff[x][y] = '`'; console.log('collision: '+collider); return true;
+		case '|': screenBuff[x][y] = '`'; if (debug) console.log('collision: '+collider); return true;
+		case '-': screenBuff[x][y] = '`'; if (debug) console.log('collision: '+collider); return true;
+		case '#': collider = '#'; screenBuff[x][y] = '`'; if (debug) console.log('collision: '+collider); return true;
 		default: 
 		if(debug) console.log('collision: '+collider); return true;
 	}
