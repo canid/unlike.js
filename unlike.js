@@ -1,5 +1,10 @@
 function doKeys(e) {
 	if (debug) var stime = new Date().getTime();
+	
+	// stupid toggling flag, to make sure table changes on key event.
+	keyFlag = !keyFlag;
+	tbl.setAttribute('flag', keyFlag);
+	
 	var prevX = player.curX, prevY = player.curY;
 	var keyCode = e.keyCode; 
 	switch(keyCode) {		
@@ -132,6 +137,8 @@ var buffSizeX =24, buffSizeY = 24;
 var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
 var entities = [];
 
+var keyFlag = true;
+
 var screenBuff = genDungeon();
 // Creating table of sceen buffer elements with their contents as text nodes.
 var body = document.getElementsByTagName('body')[0];
@@ -156,4 +163,36 @@ for (y=0; y<buffSizeY; y++){
 tbl.appendChild(tbdy);
 body.appendChild(tbl);
 
+
+// create ui
+tbl2 = document.createElement('tbl');
+tbdy = document.createElement('tbdy');
+tr = document.createElement('tr'); tr.setAttribute('id', 'ui');
+td = document.createElement('td'); tr.setAttribute('id', 'stats');
+
+var a = document.createElement('a'); a.setAttribute('id', 'hp');
+a.appendChild(document.createTextNode('HP: '+player.hp+' '));
+td.appendChild(a);
+
+a = document.createElement('a'); a.setAttribute('id', 'ac');
+a.appendChild(document.createTextNode('AC: '+player.ac+' '));
+td.appendChild(a);
+
+a = document.createElement('a'); a.setAttribute('id', 'message');
+a.appendChild(document.createTextNode('Stats do not update in UI yet.'));
+td.appendChild(a);
+
+tr.appendChild(td);
+
+tbdy.appendChild(tr);
+tbl2.appendChild(tbdy);
+body.appendChild(tbl2);
+
 body.addEventListener('keydown', doKeys, false);
+tbl.addEventListener('change', doUIStats, false);
+
+function doUIStats() {
+	alert('test');
+	document.getElementById('hp').innerHTML = 'HP: '+player.hp;
+	document.getElementById('ac').innerHTML = 'AC: '+player.ac;
+}
