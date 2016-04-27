@@ -11,6 +11,16 @@ function doKeys(e) {
 		case 100: (player.curX > 0 && !isCollision(player.curX-1, player.curY)) && player.curX--; break;
 		case 39: (player.curX < buffSizeX-1 && !isCollision(player.curX+1, player.curY)) && player.curX++; break;
 		case 102: (player.curX < buffSizeX-1 && !isCollision(player.curX+1, player.curY)) && player.curX++; break;
+		case 71: 
+			entities.forEach( function(entity, i) {
+				if (entity.type=='item' && player.curX==entity.curX && player.curY == entity.curY) {
+					console.log("pop.");
+					player.inv.push(entity);
+					entities.splice(i, 1);
+					console.log("snip.");
+				}
+			});
+			break;
 		default: break;
 	}
 	
@@ -18,13 +28,12 @@ function doKeys(e) {
 	for (y=0; y<buffSizeY; y++){
 		for(x=0; x<buffSizeX; x++) {
 			var td = document.getElementById('tr'+y+'td'+x);
-			if (x == player.curX && y == player.curY) td.innerHTML = '@';
-			else td.innerHTML = screenBuff[x][y];
-			monsters.forEach( function(monster, i) {
-				if (monster.dead == true) monsters.splice(i, 1);
-				else if (x==monster.curX && y==monster.curY)  td.innerHTML = monster.icon;
+			td.innerHTML = screenBuff[x][y];
+			entities.forEach( function(entity, i) {
+				if (entity.type == 'monster' && entity.dead) entities.splice(i, 1);
+				else if (x==entity.curX && y==entity.curY)  td.innerHTML = entity.icon;
 			});
-		
+			if (x == player.curX && y == player.curY) td.innerHTML = '@';
 		}
 	}
 	if(debug) {
@@ -52,9 +61,12 @@ function doCombat(foe) {
 
 function isCollision(x, y) {
 	var collider = false;
-	monsters.forEach( function(monster) {
-		if (x==monster.curX && y==monster.curY) { monster = doCombat(monster); collider = monster}
+	
+	// check entities for monster collision at target location.
+	entities.forEach( function(entity) {
+		if (entity.type == 'monster' && x==entity.curX && y==entity.curY) { entity = doCombat(entity); collider = entity}
 	})
+	
 	if(collider) {console.log('collision: '+collider.icon); return true;}
 	switch (screenBuff[x][y]) {
 		case ' ': collider = ' ';
@@ -81,7 +93,10 @@ function genDungeon() {
 	for (y=0; y<buffSizeY; y++){
 			for(x=0; x<buffSizeX; x++) {
 				if (Math.random() > 0.997 ) {
-					monsters.push({icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false});
+					entities.push({icon:'j', curX:x, curY:y, hp:5, dmg:3, ac:0, dead:false, type:'monster'});
+				}
+				else if (Math.random() > 0.998 ) {
+					entities.push({icon:'\u2695', curX:x, curY:y, hp:5, type:'item'});
 				}
 				dungeon[x][y] = '-';
 			}
@@ -115,7 +130,7 @@ var debug = true;
 var buffSizeX =24, buffSizeY = 24;
 
 var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ac:0, dmg:4, dex:0, inv:[], wld:[], dead:false}
-var monsters = [];
+var entities = [];
 
 var screenBuff = genDungeon();
 // Creating table of sceen buffer elements with their contents as text nodes.
@@ -130,8 +145,8 @@ for (y=0; y<buffSizeY; y++){
 		td.setAttribute('id', 'tr'+y+'td'+x);
 		if (x==player.curX && y==player.curY) td.appendChild(document.createTextNode(player.icon));
 		else td.appendChild(document.createTextNode(screenBuff[x][y]));
-		monsters.forEach( function(monster) {
-			if (x==monster.curX && y==monster.curY)  td.innerHTML = monster.icon;
+		entities.forEach( function(entity) {
+			if (x==entity.curX && y==entity.curY)  td.innerHTML = entity.icon;
 		});
 
         tr.appendChild(td);
