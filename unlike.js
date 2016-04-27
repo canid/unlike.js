@@ -111,7 +111,7 @@ function genDungeon() {
 				
 				// now some potions
 				else if (Math.random() > 0.9985 ) {
-					entities.push({icon:'\u2695', curX:x, curY:y, hp:5, type:'item'});
+					entities.push({name:'phealing', icon:'\u2695', curX:x, curY:y, hp:5, type:'item'});
 				}
 				
 				/* now coins, trying  the design I'm hoping to use. this places all coins of each type
@@ -155,7 +155,7 @@ function genDungeon() {
 		dungeon[rStartX][vwall] = '#';
 		dungeon[rStartX+rSizeX-1][vwall] = '#';		
 	}
-	
+	console.log(entities[entities.length-1]);
 	return dungeon;
 }
 
@@ -167,9 +167,9 @@ var player = {icon:'@', curX:0, curY:0, hp:20, xp:0, lvl:1, ag:0, ac:0, dmg:4, d
 var entities = [];
 var phealing = {type:'item', name:'', hp:5};
 var pHealing = {type:'item', name:'', hp:10};
-var ccopper = {icon:'c',type:'item', name:'ccopper', desc:'', value:0, curX:0, curY:0};
-var csilver = {icon:'s',type:'item', name:'csilver', desc:'', value:0};
-var cgold = {icon:'g',type:'item', name:'cgold', desc:'', value:0, curX:0, curY:0};
+var ccopper = {icon:'c',type:'item', name:'ccopper', curX:0, curY:0, desc:'copper coins', value:0};
+var csilver = {icon:'s',type:'item', name:'csilver', desc:'silver coins', value:0};
+var cgold = {icon:'g',type:'item', name:'cgold', desc:'gold coins', value:0, curX:0, curY:0};
 var aleather = {type:'item', name:'aleather', desc:'leather armor'};
 var achain = {type:'item', name:'chainmail armor'};
 
