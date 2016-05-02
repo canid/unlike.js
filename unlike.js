@@ -16,18 +16,18 @@ function doKeys(e) {
 		case 100: (player.curX > 0 && !isCollision(player.curX-1, player.curY)) && player.curX--; break;
 		case 39: (player.curX < buffSizeX-1 && !isCollision(player.curX+1, player.curY)) && player.curX++; break;
 		case 102: (player.curX < buffSizeX-1 && !isCollision(player.curX+1, player.curY)) && player.curX++; break;
-		case 71: 
-			entities.forEach( function(entity, i) {
-				if (entity.type=='item' && player.curX==entity.curX && player.curY == entity.curY) {
-					if (entity.name=='ccopper'||entity.name=='csilver'||entity.name=='cgold') {
-						player.ag += entity.value; if (debug) console.log('Ag: '+player.ag);
+		case 71:
+			for (i = 0; i<entities.length; i++) {
+				if (entities[i].type=='item' && player.curX==entities[i].curX && player.curY == entities[i].curY) {
+					if (entities[i].name=='ccopper'||entities[i].name=='csilver'||entities[i].name=='cgold') {
+						player.ag += entities[i].value; if (debug) console.log('Ag: '+player.ag);
 					}
-					else player.inv.push(entity);
+					else player.inv.push(entities[i]);
 					if(debug) console.log("push: "+player.inv[player.inv.length-1]);
 					entities.splice(i, 1);
 					if(debug) console.log("snip.");
 				}
-			});
+			};
 			break;
 		default: break;
 	}
@@ -37,10 +37,10 @@ function doKeys(e) {
 		for(x=0; x<buffSizeX; x++) {
 			var td = document.getElementById('tr'+y+'td'+x);
 			td.innerHTML = screenBuff[x][y];
-			entities.forEach( function(entity, i) {
-				if (entity.type == 'monster' && entity.dead) entities.splice(i, 1);
-				else if (x==entity.curX && y==entity.curY)  td.innerHTML = entity.icon;
-			});
+			for (var i = 0; i<entities.length; i++) {
+				if (entities[i].type == 'monster' && entities[i].dead) entities.splice(i, 1);
+				else if (x==entities[i].curX && y==entities[i].curY)  td.innerHTML = entities[i].icon;
+			};
 			document.getElementById('hp').innerHTML = "HP: "+player.hp+' ';
 			document.getElementById('ac').innerHTML = "AC: "+player.ac+' ';
 			document.getElementById('ag').innerHTML = "Ag: "+player.ag+' ';
@@ -74,9 +74,9 @@ function isCollision(x, y) {
 	var collider = false;
 	
 	// check entities for monster collision at target location.
-	entities.forEach( function(entity) {
-		if (entity.type == 'monster' && x==entity.curX && y==entity.curY) {entity = doCombat(entity); collider = entity}
-	})
+	for (var i = 0; i<entities.length; i++) {
+		if (entities[i].type == 'monster' && x==entities[i].curX && y==entities[i].curY) {entities[i] = doCombat(entities[i]); collider = entities[i]}
+	}
 	
 	if(collider) {if (debug) console.log('collision: '+collider.icon); return true;}
 	switch (screenBuff[x][y]) {
@@ -116,25 +116,19 @@ function genDungeon() {
 				
 				/* now coins, trying  the design I'm hoping to use. this places all coins of each type
 				at the same x,y on screen for some reason. Will have to fix later*/
-				else if (Math.random() > 0.995) {
-					var copper = ccopper;
-					copper.curX = x; copper.curY = y;
-					copper.value= 0.01 * rndBetween(1, 100);
-					entities.push(copper);
-					if(debug) console.log('copper! '+copper.curX+', '+copper.curY+': '+copper.value);
+				else if (Math.random() > 0.996) {
+					var cval= 0.01 * rndBetween(1, 50);
+					entities.push({type:'item',name:'ccopper', icon:'c', curX:x, curY:y, value:cval});
+					//if(debug) console.log('copper! '+x+', '+y+': '+cval);
 				}
-				else if (Math.random() > 0.998) {
-					var silver = csilver;
-					silver.curX = x; silver.curY = y;
-					silver.value = rndBetween(1, 100);
-					entities.push(silver);
-					console.log('silver! '+silver.curX+', '+silver.curY+': '+silver.value);
+				else if (Math.random() > 0.9985) {
+					var sval = rndBetween(1, 50);
+					entities.push({type:'item', name:'csilver', icon:'s', curX:x, curY:y, value:sval});
+					//console.log('silver! '+x+', '+y+': '+sval);
 				}
-				
 				dungeon[x][y] = '-';
 			}
 	}
-// cgold.value : rndBetween(1, 8)
 	
 	// rnd seed room size and location
 	var rSizeX = rndBetween(5, 8);
@@ -155,7 +149,8 @@ function genDungeon() {
 		dungeon[rStartX][vwall] = '#';
 		dungeon[rStartX+rSizeX-1][vwall] = '#';		
 	}
-	console.log(entities[entities.length-1]);
+	
+	if(debug) console.log('genDungeon');
 	return dungeon;
 }
 
@@ -188,11 +183,11 @@ for (y=0; y<buffSizeY; y++){
 		td.setAttribute('id', 'tr'+y+'td'+x);
 		if (x==player.curX && y==player.curY) td.appendChild(document.createTextNode(player.icon));
 		else td.appendChild(document.createTextNode(screenBuff[x][y]));
-		entities.forEach( function(entity) {
-			if (x==entity.curX && y==entity.curY) {
-				td.innerHTML = entity.icon; if(debug) console.log(entity.name+': '+entity.curX+', '+entity.curY);
+		for(var i = 0; i<entities.length; i++){
+			if (x==entities[i].curX && y==entities[i].curY) {
+				td.innerHTML = entities[i].icon;
 			}
-		});
+		};
 
         tr.appendChild(td);
 	}
